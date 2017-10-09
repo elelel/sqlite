@@ -26,6 +26,8 @@ namespace elelel {
       query(database_ptr db, const std::string& query_str);
 
       // Execute
+      void step(std::error_code& ec); 
+      void step();
       void execute(std::error_code& ec); 
       void execute();
 

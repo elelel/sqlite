@@ -52,11 +52,17 @@ CREATE TABLE `table1` (
         q.params.bind(sqlite::make_params(i1, i2));
       }
     }
-    WHEN("Inserted a record") {
+    WHEN("Inserting a record") {
       using params_type = sqlite::params<int32_t, int32_t>::type;
       sqlite::query<params_type> q(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
       q.params.bind(sqlite::make_params(1, 2));
       q.execute();
+      WHEN("Selecting inserted") {
+        using params_type = sqlite::params<int32_t, int32_t>::type;
+        using results_type = sqlite::row<int32_t, int32_t>::type;
+        sqlite::query<params_type, results_type> q(db, "SELECT `int_field`, `int_field_not_null` FROM `table1`");
+        q.execute();
+      }
     }
   }
 }

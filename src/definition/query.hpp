@@ -11,16 +11,26 @@ elelel::sqlite::query<ParamsTuple, ResultsTuple>::query(database_ptr db, const s
 }
 
 template <typename ParamsTuple, typename ResultsTuple>
-void elelel::sqlite::query<ParamsTuple, ResultsTuple>::execute(std::error_code& ec) {
+void elelel::sqlite::query<ParamsTuple, ResultsTuple>::step(std::error_code& ec) {
   ec = result_code{::sqlite3_step(**stmt_)};
   begin_ = true;
 }
 
 template <typename ParamsTuple, typename ResultsTuple>
-void elelel::sqlite::query<ParamsTuple, ResultsTuple>::execute() {
+void elelel::sqlite::query<ParamsTuple, ResultsTuple>::step() {
   std::error_code ec;
-  execute(ec);
+  step(ec);
   if (ec != result::success) throw std::system_error(ec);
+}
+
+template <typename ParamsTuple, typename ResultsTuple>
+void elelel::sqlite::query<ParamsTuple, ResultsTuple>::execute(std::error_code& ec) {
+  step(ec);
+}
+
+template <typename ParamsTuple, typename ResultsTuple>
+void elelel::sqlite::query<ParamsTuple, ResultsTuple>::execute() {
+  step();
 }
 
 template <typename ParamsTuple, typename ResultsTuple>
