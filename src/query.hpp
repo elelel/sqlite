@@ -31,7 +31,7 @@ namespace elelel {
       void execute(std::error_code& ec); 
       void execute();
 
-      // Prepare to rexecute again
+      // Prepare to reexecute again
       void reset(std::error_code& ec);
       void reset();
 

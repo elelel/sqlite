@@ -22,4 +22,14 @@ auto elelel::sqlite::parameters_container<OutputTuple>::operator=(const type& ot
   return *this;
 }
 
+template <typename OutputTuple>
+void elelel::sqlite::parameters_container<OutputTuple>::clear(std::error_code& ec) const {
+  ec = result_code{::sqlite3_clear_bindings(**stmt_)};
+}
 
+template <typename OutputTuple>
+void elelel::sqlite::parameters_container<OutputTuple>::clear() const {
+  std::error_code ec;
+  ec = result_code{::sqlite3_clear_bindings(**stmt_)};
+  if (ec != result::success) throw std::system_error(ec);
+}

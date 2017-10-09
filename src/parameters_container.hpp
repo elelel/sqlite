@@ -20,23 +20,37 @@ namespace elelel {
 
       // Bind single param by index
       template <typename WrappedValue>
-      std::error_code bind_value(const int i, WrappedValue&& value) {
+      void bind_value(std::error_code& ec, const int i, WrappedValue&& value) {
         typedef typename std::remove_reference<WrappedValue>::type::value_type value_type;
-        return type_policy<value_type>::bind(**stmt_, i, std::forward<WrappedValue>(value));
+        ec = type_policy<value_type>::bind(**stmt_, i, std::forward<WrappedValue>(value));
+      }
+
+      template <typename WrappedValue>
+      void bind_value(const int i, WrappedValue&& value) {
+        std::error_code ec;
+        bind_value(ec, i, std::forward<WrappedValue>(value));
+        if (ec != result::success) throw std::system_error(ec);
       }
 
       // Bing multiple params, variadic
       template <size_t I = 1, typename WrappedValue>
-      std::error_code bind_values(WrappedValue&& value) {
-        auto ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, std::forward<WrappedValue>(value));
-        return ec;
+      void bind_values(std::error_code& ec, WrappedValue&& value) {
+        ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, std::forward<WrappedValue>(value));
       }
       
       template <size_t I = 1, typename WrappedValue, typename... WrappedValues>
-      std::error_code bind_values(const WrappedValue value, WrappedValues&&... values) {
-        auto ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, value);
-        if (ec != result::success) return ec;
-        return bind_values(std::forward<WrappedValues>(values)...);
+      void bind_values(std::error_code& ec, WrappedValue&& value, WrappedValues&&... values) {
+        ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, value);
+        if (ec == result::success) {
+          bind_values(ec, std::forward<WrappedValues>(values)...);
+        }
+      }
+
+      template <typename... WrappedValues>
+      void bind_values(WrappedValues&&... values) {
+        std::error_code ec;
+        bind_values(ec, std::forward<WrappedValues>(values)...);
+        if (ec != result::success) throw std::system_error(ec);
       }
 
       // Bind params as tuple
@@ -48,8 +62,10 @@ namespace elelel {
       std::error_code bind(OutputTuple&& tuple) {
         return bind_tuple(std::forward<OutputTuple>(tuple));
       }
-      
 
+      // Clear bindings
+      void clear(std::error_code& ec) const;
+      void clear() const;
 
     private:
       std::shared_ptr<statement> stmt_;
@@ -64,7 +80,8 @@ namespace elelel {
       template <size_t I = 0, typename... TupleArgs>
       typename std::enable_if<I != sizeof...(TupleArgs), std::error_code>::type
       bind_tuple_(std::tuple<TupleArgs...>&& tuple) {
-        auto ec = bind_value(I + 1, std::get<I>(tuple));
+        std::error_code ec;
+        bind_value(ec, I + 1, std::get<I>(tuple));
         if (ec != result::success) return ec;
         return bind_tuple_<I + 1, TupleArgs...>(std::forward<std::tuple<TupleArgs...>>(tuple));
       }
