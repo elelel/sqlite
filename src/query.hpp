@@ -33,6 +33,9 @@ namespace elelel {
       void reset(std::error_code& ec);
       void reset();
 
+      // Accessors
+      ::sqlite3_stmt* stmt() const;
+
     private:
       database_ptr db_;
       bool begin_;

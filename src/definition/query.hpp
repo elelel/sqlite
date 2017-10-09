@@ -35,3 +35,8 @@ void elelel::sqlite::query<ParamsTuple, ResultsTuple>::reset() {
   reset(ec);
   if (ec != result::success) throw std::system_error(ec);
 }
+
+template <typename ParamsTuple, typename ResultsTuple>
+auto elelel::sqlite::query<ParamsTuple, ResultsTuple>::stmt() const -> ::sqlite3_stmt* {
+  return *stmt_;
+}
