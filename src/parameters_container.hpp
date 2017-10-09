@@ -26,13 +26,13 @@ namespace elelel {
       }
 
       // Bing multiple params, variadic
-      template <size_t I = 0, typename WrappedValue>
+      template <size_t I = 1, typename WrappedValue>
       std::error_code bind_values(WrappedValue&& value) {
         auto ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, std::forward<WrappedValue>(value));
         return ec;
       }
       
-      template <size_t I = 0, typename WrappedValue, typename... WrappedValues>
+      template <size_t I = 1, typename WrappedValue, typename... WrappedValues>
       std::error_code bind_values(const WrappedValue value, WrappedValues&&... values) {
         auto ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, value);
         if (ec != result::success) return ec;
@@ -45,7 +45,7 @@ namespace elelel {
       }
 
       // Bind params synonym
-      std::error_code bind_params(OutputTuple&& tuple) {
+      std::error_code bind(OutputTuple&& tuple) {
         return bind_tuple(std::forward<OutputTuple>(tuple));
       }
       
@@ -64,7 +64,7 @@ namespace elelel {
       template <size_t I = 0, typename... TupleArgs>
       typename std::enable_if<I != sizeof...(TupleArgs), std::error_code>::type
       bind_tuple_(std::tuple<TupleArgs...>&& tuple) {
-        auto ec = bind_value(I, std::get<I>(tuple));
+        auto ec = bind_value(I + 1, std::get<I>(tuple));
         if (ec != result::success) return ec;
         return bind_tuple_<I + 1, TupleArgs...>(std::forward<std::tuple<TupleArgs...>>(tuple));
       }

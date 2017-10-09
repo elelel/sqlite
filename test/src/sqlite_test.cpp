@@ -29,10 +29,10 @@ CREATE TABLE `table1` (
         q.params.bind_tuple(sqlite::row<int32_t>::type(std::optional<int32_t>(1)));
       }
       WHEN("Using make_params") {
-        q.params.bind_params(sqlite::make_params<int32_t>(1));
-        q.params.bind_params(sqlite::make_params(1));
+        q.params.bind(sqlite::make_params<int32_t>(1));
+        q.params.bind(sqlite::make_params(1));
         int i = 1;
-        q.params.bind_params(sqlite::make_params(i));
+        q.params.bind(sqlite::make_params(i));
       }
     }
     WHEN("Binding two arguments") {
@@ -46,11 +46,17 @@ CREATE TABLE `table1` (
                                                                 std::optional<int32_t>(2)));
       }
       WHEN("Using make_params") {
-        q.params.bind_params(sqlite::make_params<int32_t, int32_t>(1, 2));
+        q.params.bind(sqlite::make_params<int32_t, int32_t>(1, 2));
         int i1 = 1;
         int i2 = 2;
-        q.params.bind_params(sqlite::make_params(i1, i2));
+        q.params.bind(sqlite::make_params(i1, i2));
       }
+    }
+    WHEN("Inserted a record") {
+      using params_type = sqlite::params<int32_t, int32_t>::type;
+      sqlite::query<params_type> q(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
+      q.params.bind(sqlite::make_params(1, 2));
+      q.execute();
     }
   }
 }
