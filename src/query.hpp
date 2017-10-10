@@ -5,7 +5,7 @@
 
 #include "database.hpp"
 #include "parameters_container.hpp"
-#include "read_rows_container.hpp"
+//#include "read_rows_container.hpp"
 
 namespace elelel {
   namespace sqlite {
@@ -21,7 +21,9 @@ namespace elelel {
       friend struct input_iterator;
 
       using type = query<ParamsTuple, ResultsTuple>;
-      using iterator = input_iterator<type, ResultsTuple>;
+      using params_tuple = ParamsTuple;
+      using results_tuple = ResultsTuple;
+
 
       query(database_ptr db, const std::string& query_str);
 
@@ -37,15 +39,17 @@ namespace elelel {
 
       // Accessors
       ::sqlite3_stmt* stmt() const;
+      bool at_results_begin() const;
+      bool at_results_end() const;
 
     private:
       database_ptr db_;
-      bool begin_;
-      bool end_;
+      bool at_results_begin_;
+      bool at_results_end_;
       std::shared_ptr<statement> stmt_;
     public:
-      parameters_container<ParamsTuple> params;
-      read_rows_container<ResultsTuple> results;
+      parameters_container<type, ParamsTuple> params;
+      //      read_rows_container<ResultsTuple> results;
     };
   }
 }

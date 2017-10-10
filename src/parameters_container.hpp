@@ -7,22 +7,20 @@
 namespace elelel {
   namespace sqlite {
     
-    template <typename OutputTuple>
+    template <typename Query, typename OutputTuple>
     struct parameters_container {
       using arg_tuple = OutputTuple;
-      using type = parameters_container<arg_tuple>;
+      using type = parameters_container<Query, arg_tuple>;
       using iterator = parameters_iterator<type, arg_tuple>;
       
-      parameters_container(std::shared_ptr<statement> stmt);
+      parameters_container(Query& query);
       parameters_container(const type& other);
-      void swap(type& other);
-      type& operator=(const type& other);
 
       // Bind single param by index
       template <typename WrappedValue>
       void bind_value(std::error_code& ec, const int i, WrappedValue&& value) {
         typedef typename std::remove_reference<WrappedValue>::type::value_type value_type;
-        ec = type_policy<value_type>::bind(**stmt_, i, std::forward<WrappedValue>(value));
+        ec = type_policy<value_type>::bind(query_.stmt(), i, std::forward<WrappedValue>(value));
       }
 
       template <typename WrappedValue>
@@ -35,12 +33,12 @@ namespace elelel {
       // Bing multiple params, variadic
       template <size_t I = 1, typename WrappedValue>
       void bind_values(std::error_code& ec, WrappedValue&& value) {
-        ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, std::forward<WrappedValue>(value));
+        ec = type_policy<typename WrappedValue::value_type>::bind(query_.stmt(), I, std::forward<WrappedValue>(value));
       }
       
       template <size_t I = 1, typename WrappedValue, typename... WrappedValues>
       void bind_values(std::error_code& ec, WrappedValue&& value, WrappedValues&&... values) {
-        ec = type_policy<typename WrappedValue::value_type>::bind(**stmt_, I, value);
+        ec = type_policy<typename WrappedValue::value_type>::bind(query_.stmt(), I, value);
         if (ec == result::success) {
           bind_values(ec, std::forward<WrappedValues>(values)...);
         }
@@ -68,7 +66,7 @@ namespace elelel {
       void clear() const;
 
     private:
-      std::shared_ptr<statement> stmt_;
+      Query& query_;
 
       // Bind argments tuple implementation
       template <size_t I = 0, typename... TupleArgs>
