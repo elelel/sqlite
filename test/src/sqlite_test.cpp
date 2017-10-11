@@ -31,12 +31,12 @@ CREATE TABLE `table1` (
       // Use the saved query to insert a second row with values 3 and 4
       ins.params.clear();
       ins.reset();
-      ins.params.bind(sqlite::make_params(3, 4));  // The last one is NULL
+      ins.params.bind(sqlite::make_params(3, sqlite::null<int32_t>()));
       ins.execute();
       // Select records
       using results_type = sqlite::row<int32_t, int32_t>::type;
       sqlite::query<std::tuple<>, results_type> sel(db, "SELECT `field1`, `field2` FROM `table1`");
-           size_t count{0};
+      size_t count{0};
       auto value_or_null = [] (std::optional<int32_t> v) {
         if (v) return std::to_string(*v); else return std::string{"NULL"};
       };
