@@ -1,51 +1,52 @@
 #include "../read_rows_container.hpp"
 
 template <typename Container, typename T>
-elelel::read_rows_iterator<Container, T>::read_rows_iterator(Container& cont, const bool end) :
+elelel::sqlite::read_rows_iterator<Container, T>::read_rows_iterator(Container& cont, const bool end) :
   cont_(cont),
   pos_(0),
   end_(end) {
   }
 
 template <typename Container, typename T>
-elelel::read_rows_iterator<Container, T>::read_rows_iterator(const type& other) :
-  pos_(other.pos_)
+elelel::sqlite::read_rows_iterator<Container, T>::read_rows_iterator(const type& other) :
+  cont_(other.cont_),
+  pos_(other.pos_),
   end_(other.end_) {
 }
 
 template <typename Container, typename T>
-void elelel::read_rows_iterator<Container, T>::swap(type& other) {
+void elelel::sqlite::read_rows_iterator<Container, T>::swap(type& other) {
   std::swap(pos_, other.pos_);
   std::swap(end_, other.end_);
 }
 
 template <typename Container, typename T>
-auto elelel::read_rows_iterator<Container, T>::operator=(const type& other) -> type& {
+auto elelel::sqlite::read_rows_iterator<Container, T>::operator=(const type& other) -> type& {
   type tmp(other);
   swap(tmp);
   return *this;
 }
 
 template <typename Container, typename T>
-bool elelel::read_rows_iterator<Container, T>::operator==(const type& other) const {
-  return (pos_ == other.pos_) && (end_ == other.end_);
+bool elelel::sqlite::read_rows_iterator<Container, T>::operator==(const type& other) const {
+  return (end_ && other.end_) || ((end_ == other.end_) && (pos_ == other.pos_));
 }
 
 template <typename Container, typename T>
-bool elelel::read_rows_iterator<Container, T>::operator!=(const type& other) const {
+bool elelel::sqlite::read_rows_iterator<Container, T>::operator!=(const type& other) const {
   return !(*this == other);
 }
 
 template <typename Container, typename T>
-auto elelel::read_rows_iterator<Container, T>::operator++() -> type& {
+auto elelel::sqlite::read_rows_iterator<Container, T>::operator++() -> type& {
   std::error_code ec;
-  query_.step(ec);
+  cont_.query_.step(ec);
   switch (ec.value()) {
-  case result_code::DONE:
+  case static_cast<int>(result_code::DONE):
     ++pos_;
     end_ = true;
     break;
-  case result_code::SQLITE_ROW:
+  case static_cast<int>(result_code::ROW):
     ++pos_;
     break;
   default:
@@ -55,13 +56,13 @@ auto elelel::read_rows_iterator<Container, T>::operator++() -> type& {
 }
 
 template <typename Container, typename T>
-auto elelel::read_rows_iterator<Container, T>::operator++(int) -> type {
+auto elelel::sqlite::read_rows_iterator<Container, T>::operator++(int) -> type {
   type tmp;
   this->operator++();
   return tmp;
 }
 
 template <typename Container, typename T>
-auto elelel::read_rows_iterator<Container, T>::operator*() -> reference const {
-  // Recurse tuple and get each column value
+auto elelel::sqlite::read_rows_iterator<Container, T>::operator*() const -> value_type {
+  return value_type{cont_.row()};
 }

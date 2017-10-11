@@ -1,13 +1,16 @@
 #pragma once
 
-#include "statement.hpp"
-#include "read_rows_iterator.hpp"
 #include "query.hpp"
+#include "read_rows_iterator.hpp"
+#include "statement.hpp"
 
 namespace elelel {
   namespace sqlite {
     template <typename Query, typename RowTuple>
     struct read_rows_container {
+      template <typename Container, typename T>
+      friend struct read_rows_iterator;
+
       using type = read_rows_container<Query, RowTuple>;
       using iterator = read_rows_iterator<type, RowTuple>;
       

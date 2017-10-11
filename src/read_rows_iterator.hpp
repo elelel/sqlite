@@ -5,7 +5,7 @@ namespace elelel {
     template <typename Container, typename T>
     struct read_rows_iterator {
       using type = read_rows_iterator<Container, T>;
-      using value_type = T;  // Argument descriptor type
+      using value_type = T;
       using container_type = Container;
       using difference_type = std::ptrdiff_t;
       using pointer = T*;
@@ -22,7 +22,7 @@ namespace elelel {
       type& operator++();
       type operator++(int);
 
-      reference operator*() const;
+      value_type operator*() const;
 
     private:
       Container& cont_;

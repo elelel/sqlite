@@ -1,9 +1,13 @@
 #include "../contrib/Catch/include/catch.hpp"
 
+#include <iostream>
+
 #include "../include/elelel/sqlite/sqlite"
 #include "../include/elelel/sqlite/type_policy/native"
 
 #include <unistd.h>
+
+
 
 SCENARIO("TDD vertical") {
   namespace sqlite = elelel::sqlite;
@@ -54,10 +58,10 @@ CREATE TABLE `table1` (
     }
     WHEN("Inserting a record") {
       using params_type = sqlite::params<int32_t, int32_t>::type;
-      sqlite::query<params_type> q(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
-      q.params.bind(sqlite::make_params(1, 2));
-      q.execute();
-      WHEN("Selecting inserted") {
+      sqlite::query<params_type> q1(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
+      q1.params.bind(sqlite::make_params(1, 2));
+      q1.execute();
+      WHEN("Selecting single row") {
         using params_type = sqlite::params<int32_t, int32_t>::type;
         using results_type = sqlite::row<int32_t, int32_t>::type;
         sqlite::query<params_type, results_type> q(db, "SELECT `int_field`, `int_field_not_null` FROM `table1`");
@@ -70,6 +74,19 @@ CREATE TABLE `table1` (
           results_type row = q.results.row();
           REQUIRE(std::get<0>(row).value() == 1);
           REQUIRE(std::get<1>(row).value() == 2);
+        }
+        WHEN("Inserting a second row and using row iterator") {
+          sqlite::query<params_type> q2(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
+          q2.params.bind(sqlite::make_params(3, 4));
+          q2.execute();
+          
+          sqlite::query<params_type, results_type> q(db, "SELECT `int_field`, `int_field_not_null` FROM `table1`");
+          size_t count{0};
+          for (const auto r : q.results) {
+            REQUIRE(*std::get<1>(r) - *std::get<0>(r) == 1);
+            ++count;
+          }
+          REQUIRE(count == 2);
         }
       }
     }
