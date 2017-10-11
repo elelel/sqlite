@@ -6,8 +6,8 @@ elelel::sqlite::query<ParamsTuple, ResultsTuple>::query(database_ptr db, const s
   at_results_begin_{false},
   at_results_end_{false},
   stmt_{db_->prepare_statement(query_str)},
-  params{*this}
-  //results{stmt_}
+  params{*this},
+  results{*this}
 {
 }
 

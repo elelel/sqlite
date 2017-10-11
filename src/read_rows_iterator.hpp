@@ -12,7 +12,10 @@ namespace elelel {
       using reference = T&;
       using iterator_category = std::input_iterator_tag;
       
-      read_rows_iterator(Container& cont, const bool end);
+      read_rows_iterator(Container& cont, const bool end = false);
+      read_rows_iterator(const type& other);
+      void swap(type& other);
+      type& operator=(const type& other);
 
       bool operator==(const type& other) const;
       bool operator!=(const type& other) const;
@@ -22,6 +25,7 @@ namespace elelel {
       reference operator*() const;
 
     private:
+      Container& cont_;
       int pos_{0};
       bool end_{false};
     };

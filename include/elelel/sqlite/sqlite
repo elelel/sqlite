@@ -7,7 +7,7 @@
 #include "../../../src/statement.hpp"
 #include "../../../src/query.hpp"
 #include "../../../src/parameters_container.hpp"
-//#include "../../../src/read_rows_container.hpp"
+#include "../../../src/read_rows_container.hpp"
 
 #include "../../../src/definition/result.hpp"
 #include "../../../src/definition/database.hpp"

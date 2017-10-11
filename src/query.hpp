@@ -5,7 +5,7 @@
 
 #include "database.hpp"
 #include "parameters_container.hpp"
-//#include "read_rows_container.hpp"
+#include "read_rows_container.hpp"
 
 namespace elelel {
   namespace sqlite {
@@ -49,7 +49,7 @@ namespace elelel {
       std::shared_ptr<statement> stmt_;
     public:
       parameters_container<type, ParamsTuple> params;
-      //      read_rows_container<ResultsTuple> results;
+      read_rows_container<type, ResultsTuple> results;
     };
   }
 }

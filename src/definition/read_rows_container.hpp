@@ -6,6 +6,20 @@ elelel::sqlite::read_rows_container<Query, RowTuple>::read_rows_container(Query&
 }
 
 template <typename Query, typename RowTuple>
+elelel::sqlite::read_rows_container<Query, RowTuple>::read_rows_container(const type& other) {
+}
+
+template <typename Query, typename RowTuple>
+void elelel::sqlite::read_rows_container<Query, RowTuple>::swap(type& other) {
+}
+
+template <typename Query, typename RowTuple>
+auto elelel::sqlite::read_rows_container<Query, RowTuple>::operator=(const type& other) -> type& {
+  return *this;
+}
+
+
+template <typename Query, typename RowTuple>
 auto elelel::sqlite::read_rows_container<Query, RowTuple>::begin(std::error_code& ec) -> iterator {
   if (!query_.at_results_begin()) {
     query_.execute(ec);
@@ -31,4 +45,23 @@ auto elelel::sqlite::read_rows_container<Query, RowTuple>::end(std::error_code& 
 template <typename Query, typename RowTuple>
 auto elelel::sqlite::read_rows_container<Query, RowTuple>::end() -> iterator {
   return iterator(*this, true);
+}
+
+template <typename Query, typename RowTuple>
+template <typename UnwrappedValue>
+void elelel::sqlite::read_rows_container<Query, RowTuple>::get(const int i, std::optional<UnwrappedValue>& value) const {
+  value.emplace(type_policy<UnwrappedValue>::get(query_.stmt(), i));
+}
+
+template <typename Query, typename RowTuple>
+template <typename UnwrappedValue>
+std::optional<UnwrappedValue> elelel::sqlite::read_rows_container<Query, RowTuple>::get(const int i) const {
+  return type_policy<UnwrappedValue>::get(query_.stmt(), i);
+}
+
+template <typename Query, typename RowTuple>
+RowTuple elelel::sqlite::read_rows_container<Query, RowTuple>::row() const {
+  RowTuple r;
+  row_(r);
+  return r;
 }

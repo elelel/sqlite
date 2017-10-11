@@ -22,7 +22,7 @@ namespace elelel {
 
       static return_type get(sqlite3_stmt* stmt, const int i) {
         if (::sqlite3_column_type(stmt, i) != SQLITE_NULL) {
-          return return_type(::sqlite3_column_int(stmt, i));
+          return return_type{::sqlite3_column_int(stmt, i)};
         }
         return return_type{};
       }

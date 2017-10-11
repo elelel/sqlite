@@ -5,7 +5,7 @@
 
 #include <unistd.h>
 
-SCENARIO("TDD") {
+SCENARIO("TDD vertical") {
   namespace sqlite = elelel::sqlite;
   unlink("test.sqlite");
   auto db = std::make_shared<sqlite::database>("test.sqlite");
@@ -62,9 +62,17 @@ CREATE TABLE `table1` (
         using results_type = sqlite::row<int32_t, int32_t>::type;
         sqlite::query<params_type, results_type> q(db, "SELECT `int_field`, `int_field_not_null` FROM `table1`");
         q.execute();
+        WHEN("Requesting single element") {
+          REQUIRE(q.results.get<int32_t>(0).value() == 1);
+          REQUIRE(q.results.get<int32_t>(1).value() == 2);
+        }
+        WHEN("Requesting row") {
+          results_type row = q.results.row();
+          REQUIRE(std::get<0>(row).value() == 1);
+          REQUIRE(std::get<1>(row).value() == 2);
+        }
       }
     }
   }
 }
-
 
