@@ -7,7 +7,50 @@
 
 #include <unistd.h>
 
+SCENARIO("Taste") {
+  WHEN("Prepared the db") {
+    unlink("test.sqlite");
+    auto db = std::make_shared<elelel::sqlite::database>("test.sqlite");
+    elelel::sqlite::query create(db, R"(
+CREATE TABLE `table1` (
+	`field1`	INTEGER,
+	`field2`	INTEGER NOT NULL
+);
+)");
+    create.execute();
+    THEN("Taste") {
+      namespace sqlite = elelel::sqlite;
+      auto db = std::make_shared<sqlite::database>("test.sqlite");
 
+      // Declare query parameters
+      using params_type = sqlite::params<int32_t, int32_t>::type;
+      // Create a query to insert rows
+      sqlite::query<params_type> ins(db, "INSERT INTO `table1` (`field1`, `field2`) VALUES (?, ?)");
+      ins.params.bind(sqlite::make_params(1, 2));
+      ins.execute();
+      // Use the saved query to insert a second row with values 3 and 4
+      ins.params.clear();
+      ins.reset();
+      ins.params.bind(sqlite::make_params(3, 4));  // The last one is NULL
+      ins.execute();
+      // Select records
+      using results_type = sqlite::row<int32_t, int32_t>::type;
+      sqlite::query<std::tuple<>, results_type> sel(db, "SELECT `field1`, `field2` FROM `table1`");
+           size_t count{0};
+      auto value_or_null = [] (std::optional<int32_t> v) {
+        if (v) return std::to_string(*v); else return std::string{"NULL"};
+      };
+       for (const auto r : sel.results) {
+        std::cout << "Record " << count << "\n"
+                  << " field1 (by row tuple) = " << value_or_null(std::get<0>(r)) << ", "
+                  << "field2 (by row tuple) = " << value_or_null(std::get<1>(r)) << "\n"
+          // The same without declaring row record
+                  << " field1 (by column index) = " << value_or_null(sel.results.get<int32_t>(0)) << ", "
+                  << "field2 (by column index) = " << value_or_null(sel.results.get<int32_t>(1)) << "\n";
+       }
+    }
+  }
+}
 
 SCENARIO("TDD vertical") {
   namespace sqlite = elelel::sqlite;
@@ -58,9 +101,9 @@ CREATE TABLE `table1` (
     }
     WHEN("Inserting a record") {
       using params_type = sqlite::params<int32_t, int32_t>::type;
-      sqlite::query<params_type> q1(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
-      q1.params.bind(sqlite::make_params(1, 2));
-      q1.execute();
+      sqlite::query<params_type> q_insert(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
+      q_insert.params.bind(sqlite::make_params(1, 2));
+      q_insert.execute();
       WHEN("Selecting single row") {
         using params_type = sqlite::params<int32_t, int32_t>::type;
         using results_type = sqlite::row<int32_t, int32_t>::type;
@@ -76,9 +119,10 @@ CREATE TABLE `table1` (
           REQUIRE(std::get<1>(row).value() == 2);
         }
         WHEN("Inserting a second row and using row iterator") {
-          sqlite::query<params_type> q2(db, "INSERT INTO `table1` (`int_field`, `int_field_not_null`) VALUES (?, ?)");
-          q2.params.bind(sqlite::make_params(3, 4));
-          q2.execute();
+          q_insert.params.clear();
+          q_insert.reset();
+          q_insert.params.bind(sqlite::make_params(3, 4));
+          q_insert.execute();
           
           sqlite::query<params_type, results_type> q(db, "SELECT `int_field`, `int_field_not_null` FROM `table1`");
           size_t count{0};
