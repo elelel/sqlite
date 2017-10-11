@@ -15,7 +15,7 @@
   sqlite::query<params_type> ins(db, "INSERT INTO `table1` (`field1`, `field2`) VALUES (?, ?)");
   ins.params.bind(sqlite::make_params(1, 2));
   ins.execute();
-  // Use the saved query to insert a second row with values 3 and 4
+  // Use the saved query to insert a second row with values 3 and NULL
   ins.params.clear();
   ins.reset();
   ins.params.bind(sqlite::make_params(3, sqlite::null<int32_t>()));
