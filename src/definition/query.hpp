@@ -48,6 +48,22 @@ void elelel::sqlite::query<ParamsTuple, ResultsTuple>::reset() {
 }
 
 template <typename ParamsTuple, typename ResultsTuple>
+void elelel::sqlite::query<ParamsTuple, ResultsTuple>::close(std::error_code& ec) {
+  ec = result_code{::sqlite3_finalize(**stmt_)};
+  if (ec == result::success) {
+    at_results_begin_ = false;
+    at_results_end_ = false;
+  }
+}
+
+template <typename ParamsTuple, typename ResultsTuple>
+void elelel::sqlite::query<ParamsTuple, ResultsTuple>::close() {
+  std::error_code ec;
+  close(ec);
+  if (ec != result::success) throw std::system_error(ec);
+}
+
+template <typename ParamsTuple, typename ResultsTuple>
 auto elelel::sqlite::query<ParamsTuple, ResultsTuple>::stmt() const -> ::sqlite3_stmt* {
   return **stmt_;
 }

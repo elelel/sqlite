@@ -37,6 +37,10 @@ namespace elelel {
       void reset(std::error_code& ec);
       void reset();
 
+      // Close the query
+      void close(std::error_code& ec);
+      void close();
+
       // Accessors
       ::sqlite3_stmt* stmt() const;
       bool at_results_begin() const;
