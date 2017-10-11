@@ -29,6 +29,10 @@ namespace elelel {
       void get(const int i, std::optional<UnwrappedValue>& value) const;
       template <typename UnwrappedValue>
       std::optional<UnwrappedValue> get(const int i) const;
+
+      // Return curret row's size of column i in bytes
+      template <typename UnwrappedValue>
+      int size(const int i) const;
       
       // Read current row's values and returned them in wrapped form
       RowTuple row() const;

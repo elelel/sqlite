@@ -60,6 +60,12 @@ std::optional<UnwrappedValue> elelel::sqlite::read_rows_container<Query, RowTupl
 }
 
 template <typename Query, typename RowTuple>
+template <typename UnwrappedValue>
+int elelel::sqlite::read_rows_container<Query, RowTuple>::size(const int i) const {
+  return ::sqlite3_column_bytes(*query_.stmt(), i);
+}
+
+template <typename Query, typename RowTuple>
 RowTuple elelel::sqlite::read_rows_container<Query, RowTuple>::row() const {
   RowTuple r;
   row_(r);
