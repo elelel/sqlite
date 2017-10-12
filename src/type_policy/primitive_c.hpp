@@ -30,8 +30,8 @@ namespace elelel {
 
     template <>
     struct type_policy<int64_t> {
-      using bind_type = const std::optional<int32_t>&;
-      using return_type = std::optional<int32_t>;
+      using bind_type = const std::optional<int64_t>&;
+      using return_type = std::optional<int64_t>;
       static const auto fundamental = SQLITE_INTEGER;
 
       static std::error_code bind(sqlite3_stmt* stmt, const int i, bind_type value) {

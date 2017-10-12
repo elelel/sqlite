@@ -53,7 +53,7 @@ namespace elelel {
           const auto p = ::sqlite3_column_text(stmt, i);
           return_type rslt{return_type::value_type()};
           rslt->reserve(sz);
-          std::copy(p, (void*)((ptrdiff_t)p + sz), std::back_inserter(*rslt));
+          std::copy(p, (void*)((uintptr_t)p + sz), std::back_inserter(*rslt));
           return rslt;
         }
         return return_type{};

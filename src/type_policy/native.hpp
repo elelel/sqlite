@@ -7,7 +7,7 @@
 namespace elelel {
   namespace sqlite {
     template <>
-    struct type_policy<void*> {
+    struct type_policy<std::tuple<void*, int>> {
       using bind_type = const std::tuple<std::optional<const void*>, int>&;
       using return_type = std::optional<const void*>;
       static const auto fundamental = SQLITE_BLOB;
@@ -30,7 +30,7 @@ namespace elelel {
     };
 
     template <>
-    struct type_policy<char*> {
+    struct type_policy<std::tuple<char*, int>> {
       using bind_type = const std::tuple<std::optional<const char*>, int>&;
       using return_type = std::optional<const unsigned char*>;
       static const auto fundamental = SQLITE_TEXT;
