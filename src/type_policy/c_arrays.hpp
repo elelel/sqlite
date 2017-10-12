@@ -8,14 +8,13 @@ namespace elelel {
   namespace sqlite {
     template <>
     struct type_policy<std::tuple<void*, int>> {
-      using bind_type = const std::tuple<std::optional<const void*>, int>&;
-      using return_type = std::optional<const void*>;
+      using bind_type = const std::optional<std::tuple<const void*, int>>&;
+      using return_type = std::optional<std::tuple<const void*, int>>;
       static const auto fundamental = SQLITE_BLOB;
 
       static std::error_code bind(sqlite3_stmt* stmt, const int i, bind_type value) {
-        const auto& ptr_opt = std::get<0>(value);
-        if (ptr_opt && (*ptr_opt != nullptr)) {
-          return result_code{sqlite3_bind_blob(stmt, i, *std::get<0>(value), std::get<1>(value), SQLITE_TRANSIENT)};
+        if (value && std::get<0>(*value)) {
+          return result_code{sqlite3_bind_blob(stmt, i, std::get<0>(*value), std::get<1>(*value), SQLITE_TRANSIENT)};
         } else {
           return result_code{sqlite3_bind_null(stmt, i)};
         }
@@ -23,22 +22,21 @@ namespace elelel {
 
       static return_type get(sqlite3_stmt* stmt, const int i) {
         if (::sqlite3_column_type(stmt, i) != SQLITE_NULL) {
-          return return_type{::sqlite3_column_blob(stmt, i)};
+          return return_type{{::sqlite3_column_blob(stmt, i), ::sqlite3_column_bytes(stmt, i)}};
         }
         return return_type{};
       }
     };
-
+    
     template <>
     struct type_policy<std::tuple<char*, int>> {
-      using bind_type = const std::tuple<std::optional<const char*>, int>&;
-      using return_type = std::optional<const unsigned char*>;
+      using bind_type = const std::optional<std::tuple<const char*, int>>&;
+      using return_type = std::optional<std::tuple<char*, int>>;
       static const auto fundamental = SQLITE_TEXT;
 
       static std::error_code bind(sqlite3_stmt* stmt, const int i, bind_type value) {
-        const auto& ptr_opt = std::get<0>(value);
-        if (ptr_opt && (*ptr_opt != nullptr)) {
-          return result_code{sqlite3_bind_text(stmt, i, *std::get<0>(value), std::get<1>(value), SQLITE_TRANSIENT)};
+        if (value && std::get<0>(*value)) {
+          return result_code{sqlite3_bind_text(stmt, i, std::get<0>(*value), std::get<1>(*value), SQLITE_TRANSIENT)};
         } else {
           return result_code{sqlite3_bind_null(stmt, i)};
         }
@@ -46,11 +44,11 @@ namespace elelel {
 
       static return_type get(sqlite3_stmt* stmt, const int i) {
         if (::sqlite3_column_type(stmt, i) != SQLITE_NULL) {
-          return return_type{::sqlite3_column_text(stmt, i)};
+          return return_type{{(char*)::sqlite3_column_blob(stmt, i), ::sqlite3_column_bytes(stmt, i)}};
         }
         return return_type{};
       }
+      
     };
-
   }
 }

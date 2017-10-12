@@ -3,7 +3,8 @@
 #include <iostream>
 
 #include "../include/elelel/sqlite/sqlite"
-#include "../include/elelel/sqlite/type_policy/native"
+#include "../include/elelel/sqlite/type_policy/c_primitive"
+#include "../include/elelel/sqlite/type_policy/c_array"
 
 #include <unistd.h>
 
@@ -50,7 +51,9 @@ CREATE TABLE `table1` (
   `int` INTEGER,
   `int_not_null` INTEGER NOT NULL,
   `int64` INTEGER,
-  `int64_not_null` INTEGER NOT NULL
+  `int64_not_null` INTEGER NOT NULL,
+  `blob` BLOB,
+  `blob_not_null` BLOB NOT NULL
 );
 )");
   create.execute();
@@ -90,39 +93,48 @@ CREATE TABLE `table1` (
     }
   }
   WHEN("Create insert query") {
-    using params_type = sqlite::params<int32_t, int32_t, int64_t, int64_t>::type;
-    sqlite::query<params_type> ins(db, "INSERT INTO `table1` (`int`, `int_not_null`, `int64`, `int64_not_null`) VALUES (?, ?, ?, ?)");
+    using params_type = sqlite::params<int32_t, int32_t, int64_t, int64_t, std::tuple<void*, int>, std::tuple<void*, int>>::type;
+    sqlite::query<params_type> ins(db, "INSERT INTO `table1` (`int`, `int_not_null`, `int64`, `int64_not_null`, `blob`, `blob_not_null`) VALUES (?, ?, ?, ?, ?, ?)");
+    char blob_data[] = {0x0a, 0x0b, 0x0c, 0x0d};
+    auto blob_tuple = std::make_tuple<void*, int>((void*)blob_data, 4);
     WHEN("Bind insert parameters") {
       WHEN("as named params tuple") {
-        auto params = sqlite::make_params(201, 202, 203, 204);
+        auto params = sqlite::make_params(int32_t{201}, int32_t{202}, int64_t{203}, int64_t{204}, blob_tuple, blob_tuple);
         ins.params.bind(params);
       }
       WHEN("by index") {
         WHEN("One by one") {
           ins.params.bind_value(1, 1);
-          ins.params.bind_value(1, 2);
+          ins.params.bind_value(2, 2);
+          int i = 1;
+          ins.params.bind_value(1, i);
+          ins.params.bind_value(5, blob_tuple);
         }
         WHEN("Variadic") {
           ins.params.bind_values(1, 2);
         }
       }
       WHEN("as params tuples; with execute()") {
-        ins.params.bind(sqlite::make_params(0x101, 0x102, 0x103, 0x104));
+        ins.params.bind(sqlite::make_params(int32_t{0x101}, int32_t{0x102}, int64_t{0x103}, int64_t{0x104}, blob_tuple, blob_tuple));
         ins.execute();
 
         ins.params.clear();
         ins.reset();
-        ins.params.bind(sqlite::make_params(0x201, 0x202, 0x203, 0x204));
+        ins.params.bind(sqlite::make_params(int32_t{0x201}, int32_t{0x202}, int64_t{0x203}, int64_t{0x204}, blob_tuple, blob_tuple));
         ins.execute();
         THEN("Select the rows") {
           using results_type = sqlite::row<int32_t, int32_t, int64_t, int64_t>::type;
-          sqlite::query<std::tuple<>, results_type> sel(db, "SELECT `int`, `int_not_null`, `int64`, `int64_not_null` FROM `table1`");
+          sqlite::query<std::tuple<>, results_type> sel(db, "SELECT `int`, `int_not_null`, `int64`, `int64_not_null`, `blob` FROM `table1`");
           sel.execute();
           // Requesting single element
           REQUIRE((sel.results.get<int32_t>(0).value() & 0xf) == 1);
           REQUIRE((sel.results.get<int32_t>(1).value() & 0xf) == 2);
           REQUIRE((sel.results.get<int64_t>(2).value() & 0xf) == 3);
           REQUIRE((sel.results.get<int64_t>(3).value() & 0xf) == 4);
+          auto blob_col = sel.results.get<std::tuple<void*, int>>(4);
+          REQUIRE(blob_col);
+          REQUIRE(std::get<1>(*blob_col) == 4);
+          REQUIRE(memcmp(std::get<0>(*blob_col), blob_data, 4) == 0);
           // Requesting row
           results_type row = sel.results.row();
           REQUIRE((std::get<0>(row).value() & 0xf) == 1);

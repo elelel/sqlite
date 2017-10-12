@@ -49,13 +49,13 @@ auto elelel::sqlite::read_rows_container<Query, RowTuple>::end() -> iterator {
 
 template <typename Query, typename RowTuple>
 template <typename UnwrappedValue>
-void elelel::sqlite::read_rows_container<Query, RowTuple>::get(const int i, std::optional<UnwrappedValue>& value) const {
+void elelel::sqlite::read_rows_container<Query, RowTuple>::get(const int i, typename type_policy<UnwrappedValue>::return_type& value) const {
   value.emplace(type_policy<UnwrappedValue>::get(query_.stmt(), i));
 }
 
 template <typename Query, typename RowTuple>
 template <typename UnwrappedValue>
-std::optional<UnwrappedValue> elelel::sqlite::read_rows_container<Query, RowTuple>::get(const int i) const {
+auto elelel::sqlite::read_rows_container<Query, RowTuple>::get(const int i) const -> typename type_policy<UnwrappedValue>::return_type {
   return type_policy<UnwrappedValue>::get(query_.stmt(), i);
 }
 

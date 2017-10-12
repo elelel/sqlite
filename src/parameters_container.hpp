@@ -93,11 +93,17 @@ namespace elelel {
       // Bind params synonym
       template <typename ParamsTuple>
       void bind(std::error_code& ec, ParamsTuple&& tuple) {
+        using A = typename std::remove_reference<ParamsTuple>::type;
+        using B = typename std::remove_reference<OutputTuple>::type;
+        static_assert(std::is_same<A, B>::value, "parameters tuple to bind should be the same as in declaration of query");
         bind_wrapped_tuple(ec, std::forward<OutputTuple>(tuple));
       }
 
       template <typename ParamsTuple>
       void bind(ParamsTuple&& tuple) {
+        using A = typename std::remove_reference<ParamsTuple>::type;
+        using B = typename std::remove_reference<OutputTuple>::type;
+        static_assert(std::is_same<A, B>::value, "parameters tuple to bind should be the same as in declaration of query");
         bind_wrapped_tuple(std::forward<OutputTuple>(tuple));
       }
 

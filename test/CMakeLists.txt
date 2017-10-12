@@ -27,10 +27,5 @@ if (BUILD_TESTING)
   set(TP_NATIVE_TEST_SOURCES
     "src/tp_native_test.cpp"
     )
-  add_executable(tp_native_test ${TP_NATIVE_TEST_SOURCES})
-  target_compile_definitions(tp_native_test PRIVATE "CATCH_CONFIG_MAIN" "CATCH_CONFIG_COLOUR_NONE")
-  target_include_directories(tp_native_test PRIVATE ${INCLUDE_DIRS})
-  target_link_libraries(tp_native_test sqlite3 ${CMAKE_THREAD_LIBS_INIT})
-  add_test(NAME RunNativeTpTests WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" COMMAND tp_native_test)
 
 endif()

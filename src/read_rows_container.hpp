@@ -26,9 +26,9 @@ namespace elelel {
 
       // Return curret row's wrapped value of column i 
       template <typename UnwrappedValue>
-      void get(const int i, std::optional<UnwrappedValue>& value) const;
+      void get(const int i, typename type_policy<UnwrappedValue>::return_type& value) const;
       template <typename UnwrappedValue>
-      std::optional<UnwrappedValue> get(const int i) const;
+      typename type_policy<UnwrappedValue>::return_type get(const int i) const;
 
       // Return curret row's size of column i in bytes
       template <typename UnwrappedValue>
