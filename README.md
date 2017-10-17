@@ -88,6 +88,14 @@ namespace elelel {
 ```  
 Imagine, for example, if you store bitmaps as BLOBS in your sqlite database. A naive C++ library implementaion would return some predefined type, perhaps std::vector<char> when a SELECT query is issued. Here instead you should declare the template specialization within elelel::sqlite namespace that defines the types and two functions: the one reading the blob and returning it converted to your bitmap type, and it's converse.
 
+### Default type policies
+Since the library does not make any implicit assumptions what datatypes you store in Sqlite database, you must either
+write your own type policy as explained above, or explicitly include one of default type policies.
+There are three default type policies:
+ - c_primitive - primitive C wrappers for int/double ```#include <elelel/sqlite/type_policy/c_primitive>```
+ - c_array - array C wrappers for std::tuple<char*, size>/std::tuple<void*, size> to convert to BLOBs and TEXTs ```#include <elelel/sqlite/type_policy/c_array>```
+ - stl - std::vector<char>/std::string to BLOBs and TEXTs ```#include <elelel/sqlite/type_policy/stl>```
+
 ### Rows and columns access in query results
 The columns of a current query's state can be accessed in different ways:
 ```c++
