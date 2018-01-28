@@ -99,13 +99,16 @@ There are three default type policies:
 ### Rows and columns access in query results
 The columns of a current query's state can be accessed in different ways:
 ```c++
-// the rows can be accessed throw results member and iterated as a forward_iterator
+// the rows can be accessed through results member and iterated as a forward_iterator
 for (const auto r : results) { std::cout << "I've got a row!\n"; };
-// request the whole row, it ensures more correctness, because the type for the index is always matched against query's result
-auto row = *query.results.begin();
-auto col = std::get<0>(r);
 
-// request single column by index, less type safety, in case you want to decide which column to read dynamically
+// request the whole row and perform a strict-typed access to it's column;
+// it ensures more correctness, because the type for the column at index is always matched against query's result type declaration
+auto row = *query.results.begin();
+auto col = std::get<0>(row);
+
+// request single column by index;
+// offers less type safety, but is useful if you want to decide which column to read dynamically at runtime
 int i = 0;
 auto col = query.results.get<int32_t>(i);
 ```
