@@ -1,3 +1,5 @@
+WARNING: This is a very old and incomplete project :)
+
 # Modern (C++17) Sqlite header-only library
 * STL-like iterator interface
 * NULLs and unit states are always safe (std::optional)
